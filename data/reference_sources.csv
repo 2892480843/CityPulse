@@ -1,0 +1,11 @@
+﻿publisher,title,url,usage
+赛事官网,2026 AI先锋未来人才大赛企业命题与报名入口,https://activity.feishu.cn/future-talent#challenge,赛题边界与报名信息
+文化和旅游部,2025年文化和旅游发展统计公报,https://zwgk.mct.gov.cn/zfxxgkml/tjxx/202606/t20260602_966073.html,行业规模、景区与供给侧统计
+文化和旅游部,2025年国内居民出游数据情况,https://zwgk.mct.gov.cn/zfxxgkml/tjxx/202601/t20260126_964367.html,旅游人次与花费的权威基准
+高德开放平台,搜索POI 2.0,https://lbs.amap.com/api/webservice/guide/api-advanced/newpoisearch,景点、住宿、餐饮等供给特征
+高德开放平台,天气查询,https://lbs.amap.com/api/webservice/guide/api/weatherinfo,当前与未来天气特征
+高德开放平台,行政区域查询,https://lbs.amap.com/api/webservice/guide/api/district,城市层级与边界信息
+高德开放平台,路径规划,https://lbs.amap.com/api/webservice/guide/api/newroute,客源可达性与出行时间
+国家统计局,中国统计年鉴,https://www.stats.gov.cn/sj/ndsj/,城市与社会经济基准数据
+民政部,行政区划代码,https://www.mca.gov.cn/n156/n186/index.html,统一城市实体与行政区划版本
+arXiv,ChinaTravel: A Real-World Benchmark for Language Agents in Chinese Travel Planning,https://arxiv.org/abs/2412.13682,旅行规划Agent评测参考
