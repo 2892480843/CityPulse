@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal, Self
 
 from pydantic import SecretStr, model_validator
@@ -6,6 +7,9 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 Environment = Literal["development", "test", "production"]
 LogLevel = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
+
+MAX_UPLOAD_BYTES = 20 * 1024 * 1024
+MAX_CSV_ROWS = 200_000
 
 
 class Settings(BaseSettings):
@@ -24,6 +28,9 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     session_secret: SecretStr = SecretStr("local-development-only-change-me")
     cookie_secure: bool = False
+    upload_dir: Path = Path("var/uploads")
+    max_upload_bytes: int = MAX_UPLOAD_BYTES
+    max_csv_rows: int = MAX_CSV_ROWS
 
     @model_validator(mode="after")
     def reject_unsafe_production_settings(self) -> Self:

@@ -1,0 +1,10 @@
+city_code,metric_date,metric_name,value,available_at,source_url,published_at,observed_at
+222401,2026-07-01,content_growth,38.5,2026-07-02T08:00:00+08:00,https://example.gov.cn/yanji-july,2026-07-01T18:00:00+08:00,2026-07-02T08:00:00+08:00
+222401,2026-07-02,content_growth,41.2,2026-07-03T08:00:00+08:00,https://example.gov.cn/yanji-july,2026-07-02T18:00:00+08:00,2026-07-03T08:00:00+08:00
+222401,2026-07-03,content_growth,44.9,2026-07-04T08:00:00+08:00,https://example.gov.cn/yanji-july,2026-07-03T18:00:00+08:00,2026-07-04T08:00:00+08:00
+222401,2026-07-01,search_growth,31.0,2026-07-02T08:00:00+08:00,https://example.gov.cn/yanji-july,2026-07-01T18:00:00+08:00,2026-07-02T08:00:00+08:00
+222401,2026-07-02,search_growth,33.4,2026-07-03T08:00:00+08:00,https://example.gov.cn/yanji-july,2026-07-02T18:00:00+08:00,2026-07-03T08:00:00+08:00
+370300,2026-07-01,content_growth,62.7,2026-07-02T08:00:00+08:00,https://example.gov.cn/zibo-july,2026-07-01T18:00:00+08:00,2026-07-02T08:00:00+08:00
+370300,2026-07-02,content_growth,64.3,2026-07-03T08:00:00+08:00,https://example.gov.cn/zibo-july,2026-07-02T18:00:00+08:00,2026-07-03T08:00:00+08:00
+620500,2026-07-01,risk_pressure,18.2,2026-07-02T08:00:00+08:00,https://example.gov.cn/tianshui-july,2026-07-01T18:00:00+08:00,2026-07-02T08:00:00+08:00
+620500,2026-07-02,risk_pressure,19.5,2026-07-03T08:00:00+08:00,https://example.gov.cn/tianshui-july,2026-07-02T18:00:00+08:00,2026-07-03T08:00:00+08:00

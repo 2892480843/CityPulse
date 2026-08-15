@@ -8,11 +8,19 @@ logger = structlog.get_logger(__name__)
 
 
 class AppError(Exception):
-    def __init__(self, *, code: str, message: str, status_code: int) -> None:
+    def __init__(
+        self,
+        *,
+        code: str,
+        message: str,
+        status_code: int,
+        headers: dict[str, str] | None = None,
+    ) -> None:
         super().__init__(message)
         self.code = code
         self.message = message
         self.status_code = status_code
+        self.headers = headers
 
 
 def _request_id(request: Request) -> str:
@@ -24,6 +32,7 @@ def install_exception_handlers(app: FastAPI) -> None:
     async def handle_app_error(request: Request, error: AppError) -> JSONResponse:
         return JSONResponse(
             status_code=error.status_code,
+            headers=error.headers,
             content={
                 "code": error.code,
                 "message": error.message,

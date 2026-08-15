@@ -5,6 +5,8 @@ x-api-common: &api-common
     context: ./apps/api
   env_file:
     - ${CITYPULSE_ENV_FILE:-.env}
+  volumes:
+    - uploads:/app/var/uploads
   restart: unless-stopped
 
 services:
@@ -99,3 +101,4 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  uploads:
