@@ -65,3 +65,41 @@ python src/scoring.py data/city_score_snapshot.csv --output ranked_output.csv
 ## 真实性声明
 
 仓库内候选城市、数值、排名和回测曲线均为**模拟数据/方法演示**，用于说明数据合同、评分逻辑、界面与验证流程，不构成真实预测，也不宣称已取得模型指标。所有正式结果必须基于合法获取的数据和严格时间截断回测重新生成。
+
+## 生产平台工程基础
+
+> 新工程与上方静态演示原型分开。当前阶段只提供系统健康、配置、迁移、任务进程和容器基础，不代表身份、数据或预测功能已完成。
+
+### Docker Compose 启动
+
+```bash
+test -f .env || cp .env.example .env
+docker compose --env-file .env run --rm migrate
+docker compose --env-file .env up --build -d
+curl http://127.0.0.1:8080/health/ready
+```
+
+打开 `http://127.0.0.1:8080`。数据库迁移必须显式执行，API 启动时不会自动修改 Schema（数据库结构）。
+
+### 本地进程开发
+
+```bash
+python3.13 -m venv apps/api/.venv
+apps/api/.venv/bin/python -m pip install -e 'apps/api[dev]'
+npm --prefix apps/web install
+test -f .env || cp .env.example .env
+docker compose --env-file .env -f compose.yaml -f compose.dev.yaml up -d postgres redis
+CITYPULSE_DATABASE_URL='postgresql+psycopg://citypulse:local-development-database-password@127.0.0.1:5432/citypulse' \
+CITYPULSE_REDIS_URL='redis://127.0.0.1:6379/0' \
+apps/api/.venv/bin/uvicorn citypulse.main:app --app-dir apps/api/src --reload
+npm --prefix apps/web run dev
+```
+
+### 验收
+
+```bash
+apps/api/.venv/bin/pytest apps/api/tests -q
+npm --prefix apps/web test
+npm --prefix apps/web run build
+./scripts/smoke-compose.sh
+```
