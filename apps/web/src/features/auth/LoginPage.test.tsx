@@ -75,3 +75,21 @@ test('maps INVALID_CREDENTIALS to a friendly message', async () => {
 
   expect(await screen.findByText('用户名或密码不正确。')).toBeInTheDocument()
 })
+
+test('clicking a demo account fills the form', async () => {
+  mocks.login.mockReset()
+  mocks.login.mockResolvedValue({
+    id: 'u1',
+    username: 'analyst',
+    display_name: '分析师',
+    is_active: true,
+    roles: ['analyst'],
+  })
+  renderPage()
+
+  const analystCard = await screen.findByText('analyst / signal-keeper-88')
+  fireEvent.click(analystCard.closest('button') as HTMLButtonElement)
+
+  expect(screen.getByLabelText('用户名')).toHaveValue('analyst')
+  expect(screen.getByLabelText('密码')).toHaveValue('signal-keeper-88')
+})

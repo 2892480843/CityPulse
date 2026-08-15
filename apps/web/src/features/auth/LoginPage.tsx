@@ -9,6 +9,12 @@ const ERROR_MESSAGES: Record<string, string> = {
   SERVICE_MISCONFIGURED: '登录服务暂不可用，请稍后再试。',
 }
 
+const DEMO_ACCOUNTS = [
+  { username: 'admin', password: 'citypulse-demo-2026', label: '管理员', hint: '全部页面与用户管理' },
+  { username: 'analyst', password: 'signal-keeper-88', label: '分析师', hint: '数据中心上传与校验' },
+  { username: 'operator', password: 'market-ops-66', label: '运营', hint: '总览与系统状态' },
+]
+
 export function LoginPage() {
   const { login } = useAuth()
   const [username, setUsername] = useState('')
@@ -73,6 +79,30 @@ export function LoginPage() {
         <button type="submit" className="btn primary" disabled={submitting}>
           {submitting ? '正在登录…' : '登录'}
         </button>
+        <div className="demo-accounts" aria-label="演示账号">
+          <p className="demo-title">演示账号 · 点击填充（仅本地演示环境）</p>
+          <ul>
+            {DEMO_ACCOUNTS.map((account) => (
+              <li key={account.username}>
+                <button
+                  type="button"
+                  className="demo-account"
+                  onClick={() => {
+                    setUsername(account.username)
+                    setPassword(account.password)
+                    setError(null)
+                  }}
+                >
+                  <span className="demo-role">{account.label}</span>
+                  <span className="mono demo-credential">
+                    {account.username} / {account.password}
+                  </span>
+                  <small>{account.hint}</small>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
       </form>
     </main>
   )
