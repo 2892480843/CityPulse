@@ -14,10 +14,9 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { path: '/overview', label: '总览' },
   { path: '/data', label: '数据中心', roles: ['admin', 'analyst'] },
-  { path: '/predictions', label: '预测', hint: '阶段 3' },
-  { path: '/actions', label: '经营动作', hint: '阶段 4' },
-  { path: '/backtests', label: '历史回测', hint: '阶段 4', roles: ['admin', 'analyst'] },
-  { path: '/jobs', label: '任务中心', hint: '阶段 3', roles: ['admin', 'analyst'] },
+  { path: '/predictions', label: '预测' },
+  { path: '/actions', label: '经营动作' },
+  { path: '/backtests', label: '历史回测', roles: ['admin', 'analyst'] },
   { path: '/system', label: '系统状态' },
   { path: '/admin', label: '系统管理', roles: ['admin'] },
 ]

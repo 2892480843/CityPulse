@@ -11,6 +11,7 @@ COPY alembic.ini ./
 COPY migrations ./migrations
 RUN python -m pip install --no-cache-dir --upgrade pip \
     && python -m pip install --no-cache-dir .
+RUN mkdir -p /app/var/uploads && chown -R citypulse:citypulse /app/var
 USER citypulse
 EXPOSE 8000
 CMD ["uvicorn", "citypulse.main:app", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]

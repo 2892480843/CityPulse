@@ -120,3 +120,126 @@ VALID_CSV = "\n".join(
         "370300,2026-07-01,content_growth,30.0,2026-07-02T08:00:00+08:00,https://example.gov.cn/b,2026-07-01T18:00:00+08:00,2026-07-02T08:00:00+08:00",
     ]
 ) + "\n"
+
+
+def commit_dataset(client: TestClient, csv_text: str, name: str = "seed.csv") -> str:
+    import io
+
+    headers = login(client, "analyst", ANALYST_PASSWORD)
+    created = client.post(
+        "/api/v1/datasets",
+        files={"file": (name, io.BytesIO(csv_text.encode("utf-8")), "text/csv")},
+        data={"source_name": "测试种子", "legal_basis": "公开统计"},
+        headers=headers,
+    )
+    assert created.status_code in (200, 201), created.text
+    dataset_id = created.json()["dataset"]["id"]
+    validated = client.post(f"/api/v1/datasets/{dataset_id}/validate", headers=headers)
+    assert validated.status_code == 200, validated.text
+    assert validated.json()["dataset"]["status"] == "valid", validated.json()
+    committed = client.post(f"/api/v1/datasets/{dataset_id}/commit", headers=headers)
+    assert committed.status_code == 200, committed.text
+    return dataset_id
+
+
+T0 = "2026-07-15"
+
+
+def fresh_csv() -> str:
+    """Recent observations for a high-signal target and a quiet control."""
+    from datetime import date, timedelta
+
+    base = date.today() - timedelta(days=2)
+    lines = [
+        "city_code,metric_date,metric_name,value,available_at,source_url,published_at,observed_at"
+    ]
+    target_levels = {
+        "content_growth": 84,
+        "search_growth": 79,
+        "event_trigger": 76,
+        "accessibility": 66,
+        "supply_capacity": 61,
+        "weather_fit": 72,
+        "novelty": 86,
+        "cross_region_spread": 82,
+    }
+    control_levels = {
+        "content_growth": 26,
+        "search_growth": 22,
+        "event_trigger": 30,
+        "accessibility": 64,
+        "supply_capacity": 66,
+        "weather_fit": 70,
+        "novelty": 56,
+        "cross_region_spread": 28,
+    }
+    for day_offset in (2, 1):
+        day = base + timedelta(days=2 - day_offset)
+        available = f"{(day + timedelta(days=1)).isoformat()}T08:00:00+08:00"
+        published = f"{day.isoformat()}T18:00:00+08:00"
+        for city, levels in (("222401", target_levels), ("370300", control_levels)):
+            for metric, value in levels.items():
+                lines.append(
+                    f"{city},{day.isoformat()},{metric},{value},{available},"
+                    f"https://example.gov.cn/{city[4:]},{published},{available}"
+                )
+            lines.append(
+                f"{city},{day.isoformat()},risk_pressure,28,{available},"
+                f"https://example.gov.cn/{city[4:]},{published},{available}"
+            )
+    return "\n".join(lines) + "\n"
+
+
+def backtest_csv(t0: str = T0) -> str:
+    """Target 222401 ramps across cutoffs; control 370300 stays low.
+
+    available_at is the morning after each metric_date, so a cutoff only sees
+    rows that were actually obtainable before it. The target crosses the
+    action threshold between the T0-14 and T0-7 cutoffs; the control never
+    crosses it.
+    """
+    from datetime import date, timedelta
+
+    start = date.fromisoformat(t0) - timedelta(days=45)
+    end = date.fromisoformat(t0) - timedelta(days=1)
+    lines = [
+        "city_code,metric_date,metric_name,value,available_at,source_url,published_at,observed_at"
+    ]
+    day = start
+    while day <= end:
+        offset = (date.fromisoformat(t0) - day).days
+        ramp = max(0.0, min(1.0, (30 - offset) / 22))
+        target_levels = {
+            "content_growth": 16 + 68 * ramp,
+            "search_growth": 15 + 64 * ramp,
+            "event_trigger": 30 + 46 * ramp,
+            "accessibility": 66,
+            "supply_capacity": 61,
+            "weather_fit": 72,
+            "novelty": 86,
+            "cross_region_spread": 20 + 62 * ramp,
+        }
+        control_levels = {
+            "content_growth": 26,
+            "search_growth": 22,
+            "event_trigger": 30,
+            "accessibility": 64,
+            "supply_capacity": 66,
+            "weather_fit": 70,
+            "novelty": 56,
+            "cross_region_spread": 28,
+        }
+        available = f"{(day + timedelta(days=1)).isoformat()}T08:00:00+08:00"
+        published = f"{day.isoformat()}T18:00:00+08:00"
+        for city, levels in (("222401", target_levels), ("370300", control_levels)):
+            for metric, value in levels.items():
+                lines.append(
+                    f"{city},{day.isoformat()},{metric},{round(value, 1)},{available},"
+                    f"https://example.gov.cn/{city[4:]},{published},{available}"
+                )
+            lines.append(
+                f"{city},{day.isoformat()},risk_pressure,28,{available},"
+                f"https://example.gov.cn/{city[4:]},{published},{available}"
+            )
+        day += timedelta(days=1)
+    return "\n".join(lines) + "\n"

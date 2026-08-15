@@ -3,11 +3,16 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
+from citypulse.actions.router import router as actions_router
+from citypulse.backtest.router import router as backtest_router
 from citypulse.city_catalog.router import router as city_catalog_router
 from citypulse.identity.ratelimit import LoginRateLimiter
 from citypulse.identity.router import admin_router as identity_admin_router
 from citypulse.identity.router import router as identity_router
 from citypulse.ingestion.router import router as ingestion_router
+from citypulse.jobs.router import router as jobs_router
+from citypulse.prediction.router import city_router as prediction_city_router
+from citypulse.prediction.router import router as prediction_router
 from citypulse.shared.config import get_settings
 from citypulse.shared.database import create_database_engine
 from citypulse.shared.db import create_database_sessionmaker
@@ -51,6 +56,11 @@ def create_app() -> FastAPI:
     app.include_router(identity_admin_router)
     app.include_router(city_catalog_router)
     app.include_router(ingestion_router)
+    app.include_router(prediction_router)
+    app.include_router(prediction_city_router)
+    app.include_router(actions_router)
+    app.include_router(backtest_router)
+    app.include_router(jobs_router)
     return app
 
 

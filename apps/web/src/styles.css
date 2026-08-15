@@ -578,3 +578,185 @@ td {
   color: #8a8272;
   font-size: 11.5px;
 }
+
+/* ---------- Stage 3/4: predictions, actions, backtests ---------- */
+
+.inline-label {
+  display: inline-grid;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #3c4854;
+  min-width: 160px;
+}
+
+.inline-label select,
+.inline-label textarea {
+  border: 1px solid #c9c0b0;
+  border-radius: 10px;
+  padding: 9px 12px;
+  font: inherit;
+  background: #fff;
+  color: #17212b;
+}
+
+.run-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0;
+}
+
+.chip {
+  border: 1px solid #d8d1c4;
+  border-radius: 999px;
+  background: #fffdf8;
+  color: #4d564f;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.chip.on {
+  background: #17212b;
+  border-color: #17212b;
+  color: #f4f1e9;
+}
+
+.scorecell {
+  min-width: 160px;
+}
+
+.scorebar {
+  display: inline-block;
+  vertical-align: middle;
+  width: 90px;
+  height: 7px;
+  background: rgba(23, 33, 43, 0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.scorebar span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #498cff, #b54b2a);
+  border-radius: 8px;
+}
+
+.badge.priority-high { background: #e4f1e4; color: #2f5233; }
+.badge.priority-medium { background: #efe7d2; color: #7a5b16; }
+.badge.priority-watch { background: #e7e1d3; color: #4d564f; }
+.badge.priority-blocked { background: #f7e0da; color: #9d2f14; }
+.badge.job-succeeded { background: #e4f1e4; color: #2f5233; }
+.badge.job-failed { background: #f7e0da; color: #9d2f14; }
+.badge.job-running, .badge.job-queued { background: #e3e9f5; color: #2f4a7d; }
+.badge.plan-draft { background: #e7e1d3; color: #4d564f; }
+.badge.plan-pending_review { background: #efe7d2; color: #7a5b16; }
+.badge.plan-approved { background: #e4f1e4; color: #2f5233; }
+.badge.plan-rejected { background: #f7e0da; color: #9d2f14; }
+.badge.plan-archived { background: #e7e7e7; color: #5d5d5d; }
+
+.row-on td {
+  background: #fdf3ee;
+}
+
+.city-detail,
+.plan-detail {
+  border: 1px solid #d8d1c4;
+  border-radius: 16px;
+  background: #fffdf8;
+  padding: 22px;
+  margin-top: 18px;
+}
+
+.city-detail h3,
+.plan-detail h3 {
+  margin-top: 0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.metric-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 14px 0;
+}
+
+.metric-row div {
+  background: rgba(23, 33, 43, 0.04);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 4px;
+}
+
+.metric-row strong { font-size: 22px; }
+.metric-row small { color: #687078; }
+
+.factor-list {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 18px;
+}
+
+.factor-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 44px;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.series-table td { font-size: 12.5px; }
+
+.plan-facts {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.plan-facts dt {
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.plan-facts dd {
+  margin: 2px 0 0;
+  color: #3c4854;
+  font-size: 13.5px;
+}
+
+.metric-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 18px 0;
+}
+
+.metric-cards small { color: #687078; display: block; margin-top: 6px; }
+
+.backtest-form {
+  border: 1px solid #d8d1c4;
+  border-radius: 16px;
+  background: #fffdf8;
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.role-picker.wide {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 980px) {
+  .metric-row,
+  .metric-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     upload_dir: Path = Path("var/uploads")
     max_upload_bytes: int = MAX_UPLOAD_BYTES
     max_csv_rows: int = MAX_CSV_ROWS
+    deepseek_api_key: SecretStr = SecretStr("")
+    deepseek_base_url: str = "https://api.deepseek.com"
 
     @model_validator(mode="after")
     def reject_unsafe_production_settings(self) -> Self:

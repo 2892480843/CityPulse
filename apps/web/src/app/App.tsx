@@ -7,7 +7,9 @@ import { LoginPage } from '../features/auth/LoginPage'
 import { OverviewPage } from '../features/overview/OverviewPage'
 import { DataCenterPage } from '../features/data/DataCenterPage'
 import { AdminUsersPage } from '../features/admin/AdminUsersPage'
-import { PlaceholderPage } from '../features/placeholder/PlaceholderPage'
+import { PredictionsPage } from '../features/predictions/PredictionsPage'
+import { ActionsPage } from '../features/actions/ActionsPage'
+import { BacktestsPage } from '../features/backtests/BacktestsPage'
 import { SystemStatusPage } from '../features/system/SystemStatusPage'
 import type { RoleName } from '../shared/api/types'
 
@@ -20,21 +22,9 @@ type RouteDefinition = {
 const ROUTES: RouteDefinition[] = [
   { path: '/overview', element: <OverviewPage /> },
   { path: '/data', element: <DataCenterPage />, roles: ['admin', 'analyst'] },
-  { path: '/predictions', element: <PlaceholderPage title="预测" stage="阶段 3" /> },
-  {
-    path: '/actions',
-    element: <PlaceholderPage title="经营动作" stage="阶段 4" />,
-  },
-  {
-    path: '/backtests',
-    element: <PlaceholderPage title="历史回测" stage="阶段 4" />,
-    roles: ['admin', 'analyst'],
-  },
-  {
-    path: '/jobs',
-    element: <PlaceholderPage title="任务中心" stage="阶段 3" />,
-    roles: ['admin', 'analyst'],
-  },
+  { path: '/predictions', element: <PredictionsPage /> },
+  { path: '/actions', element: <ActionsPage /> },
+  { path: '/backtests', element: <BacktestsPage />, roles: ['admin', 'analyst'] },
   { path: '/system', element: <SystemStatusPage /> },
   { path: '/admin', element: <AdminUsersPage />, roles: ['admin'] },
 ]
