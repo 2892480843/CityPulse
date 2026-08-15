@@ -98,7 +98,27 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  backup:
+    <<: *api-common
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        echo "citypulse backup scheduler started (interval: $${CITYPULSE_BACKUP_INTERVAL_SECONDS:-86400}s)"
+        while true; do
+          sleep "$${CITYPULSE_BACKUP_INTERVAL_SECONDS:-86400}"
+          /app/scripts/backup.sh /app/var/backups || echo "backup failed at $$(date -Iseconds)"
+        done
+    volumes:
+      - uploads:/app/var/uploads
+      - ./scripts:/app/scripts:ro
+      - backups:/app/var/backups
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: ["backup"]
+
 volumes:
   postgres_data:
   redis_data:
   uploads:
+  backups:
