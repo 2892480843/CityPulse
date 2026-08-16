@@ -54,3 +54,23 @@ class ActionPlanUpdateRequest(BaseModel):
 
 class ReviewRequest(BaseModel):
     comment: str | None = Field(default=None, max_length=300)
+
+
+class ActionPlanVersionView(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: uuid.UUID
+    plan_id: uuid.UUID
+    version_no: int
+    event: Literal[
+        "generated", "edited", "submitted", "approved", "rejected"
+    ]
+    snapshot: dict[str, Any]
+    actor_id: uuid.UUID | None
+    note: str | None
+    created_at: datetime
+
+
+class ActionPlanVersionsResponse(BaseModel):
+    items: list[ActionPlanVersionView]
+    total: int

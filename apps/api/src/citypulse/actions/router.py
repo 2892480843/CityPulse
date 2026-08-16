@@ -9,6 +9,8 @@ from citypulse.actions.schemas import (
     ActionGenerateRequest,
     ActionPlanListResponse,
     ActionPlanUpdateRequest,
+    ActionPlanVersionsResponse,
+    ActionPlanVersionView,
     ActionPlanView,
     ReviewRequest,
 )
@@ -70,6 +72,18 @@ async def list_plans(
     plans = await service.list_plans(db, status=status)
     items = [_view(plan) for plan in plans]
     return ActionPlanListResponse(items=items, total=len(items))
+
+
+@router.get("/{plan_id}/versions", response_model=ActionPlanVersionsResponse)
+async def plan_versions(
+    plan_id: uuid.UUID,
+    _identity: Annotated[Identity, Depends(require_roles("admin", "analyst", "operator"))],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> ActionPlanVersionsResponse:
+    plan = await service.get_plan(db, plan_id)
+    versions = await service.list_plan_versions(db, plan.id)
+    items = [ActionPlanVersionView.model_validate(version) for version in versions]
+    return ActionPlanVersionsResponse(items=items, total=len(items))
 
 
 @router.get("/{plan_id}", response_model=ActionPlanView)

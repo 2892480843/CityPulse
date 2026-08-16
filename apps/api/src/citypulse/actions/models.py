@@ -42,3 +42,22 @@ class ActionPlan(Base):
     reviewed_by: Mapped[uuid.UUID | None] = mapped_column(sa.Uuid())
     reviewed_at: Mapped[datetime | None] = mapped_column(sa.DateTime(timezone=True))
     review_comment: Mapped[str | None] = mapped_column(sa.String(300))
+
+
+class ActionPlanVersion(Base):
+    __tablename__ = "action_plan_versions"
+
+    id: Mapped[uuid.UUID] = mapped_column(sa.Uuid(), primary_key=True, default=uuid.uuid4)
+    plan_id: Mapped[uuid.UUID] = mapped_column(
+        sa.ForeignKey("action_plans.id", ondelete="CASCADE"), index=True
+    )
+    version_no: Mapped[int] = mapped_column(sa.Integer())
+    event: Mapped[str] = mapped_column(sa.String(24))
+    snapshot: Mapped[dict[str, Any]] = mapped_column(sa.JSON)
+    actor_id: Mapped[uuid.UUID | None] = mapped_column(sa.Uuid())
+    note: Mapped[str | None] = mapped_column(sa.String(300))
+    created_at: Mapped[datetime] = mapped_column(
+        sa.DateTime(timezone=True), default=lambda: datetime.now(UTC)
+    )
+
+    __table_args__ = (sa.UniqueConstraint("plan_id", "version_no"),)

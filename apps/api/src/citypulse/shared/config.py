@@ -33,6 +33,8 @@ class Settings(BaseSettings):
     max_csv_rows: int = MAX_CSV_ROWS
     deepseek_api_key: SecretStr = SecretStr("")
     deepseek_base_url: str = "https://api.deepseek.com"
+    audit_retention_days: int = 365
+    upload_retention_days: int = 90
 
     @model_validator(mode="after")
     def reject_unsafe_production_settings(self) -> Self:

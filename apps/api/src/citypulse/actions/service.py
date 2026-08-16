@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from citypulse.actions.deepseek import deepseek_draft, merge_generated
 from citypulse.actions.generator import rule_draft
-from citypulse.actions.models import ActionPlan
+from citypulse.actions.models import ActionPlan, ActionPlanVersion
 from citypulse.identity.rbac import Identity
 from citypulse.prediction.service import get_result
 from citypulse.shared.config import get_settings
@@ -34,6 +34,60 @@ def _http_post_json(
     )
     with urllib.request.urlopen(request, timeout=12) as response:
         return json.loads(response.read().decode("utf-8"))
+
+
+PLAN_SNAPSHOT_FIELDS = (
+    "status",
+    "target_segment",
+    "campaign_theme",
+    "risk_notes",
+    "action_window_start",
+    "action_window_end",
+    "supply_actions",
+    "review_comment",
+)
+
+
+async def record_plan_version(
+    db: AsyncSession,
+    plan: ActionPlan,
+    *,
+    event: str,
+    actor_id: uuid.UUID | None = None,
+    note: str | None = None,
+) -> ActionPlanVersion:
+    result = await db.execute(
+        select(sa.func.coalesce(sa.func.max(ActionPlanVersion.version_no), 0)).where(
+            ActionPlanVersion.plan_id == plan.id
+        )
+    )
+    next_no = int(result.scalar_one()) + 1
+    snapshot = {field: getattr(plan, field) for field in PLAN_SNAPSHOT_FIELDS}
+    for key, value in snapshot.items():
+        if hasattr(value, "isoformat"):
+            snapshot[key] = value.isoformat()
+    version = ActionPlanVersion(
+        plan_id=plan.id,
+        version_no=next_no,
+        event=event,
+        snapshot=snapshot,
+        actor_id=actor_id,
+        note=note,
+    )
+    db.add(version)
+    await db.flush()
+    return version
+
+
+async def list_plan_versions(
+    db: AsyncSession, plan_id: uuid.UUID
+) -> list[ActionPlanVersion]:
+    result = await db.execute(
+        select(ActionPlanVersion)
+        .where(ActionPlanVersion.plan_id == plan_id)
+        .order_by(ActionPlanVersion.version_no)
+    )
+    return list(result.scalars())
 
 
 async def get_plan(db: AsyncSession, plan_id: uuid.UUID) -> ActionPlan:
@@ -90,6 +144,9 @@ async def generate_plan(
     )
     db.add(plan)
     await db.flush()
+    await record_plan_version(
+        db, plan, event="generated", actor_id=identity.user_id, note=plan.generator_type
+    )
     return plan
 
 
@@ -123,6 +180,7 @@ async def update_plan(
     if supply_actions is not None:
         plan.supply_actions = supply_actions
     await db.flush()
+    await record_plan_version(db, plan, event="edited", actor_id=plan.created_by)
     return plan
 
 
@@ -140,6 +198,9 @@ def transition(plan: ActionPlan, target: str) -> None:
 async def submit_plan(db: AsyncSession, plan: ActionPlan, *, identity: Identity) -> ActionPlan:
     transition(plan, "pending_review")
     await db.flush()
+    await record_plan_version(
+        db, plan, event="submitted", actor_id=identity.user_id
+    )
     return plan
 
 
@@ -162,6 +223,9 @@ async def review_plan(
     plan.reviewed_at = datetime.now(UTC)
     plan.review_comment = comment
     await db.flush()
+    await record_plan_version(
+        db, plan, event=decision, actor_id=identity.user_id, note=comment
+    )
     return plan
 
 

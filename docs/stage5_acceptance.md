@@ -16,9 +16,9 @@
 | 10 | Docker Compose 在 macOS 本地和 Linux 环境均可启动，健康检查、迁移、备份与恢复路径经过验证 | ✅ | macOS 本地栈运行中；Linux 冒烟 `scripts/smoke-compose.sh`（CI 中执行）；备份 `scripts/backup.sh`、恢复演练 `scripts/restore-drill.sh`（结果记录于 `backups/restore-drill.log`） |
 | 11 | 单元、数据质量、集成、契约、前端、端到端、安全和部署测试通过 | ✅ | pytest 77、vitest 21、ruff、tsc、vite build、compose smoke（含端到端数据链路） |
 
-## 已知边界（与规格一致的有意裁剪）
+## 后续迭代补齐项（0004_hardening 迁移交付）
 
-- 审计日志保留期（365 天清理任务）与原始上传文件 90 天清理任务尚未实现定时器；当前保留全部记录。
-- HSTS 头需 TLS 终止后启用，当前反向代理仅监听 HTTP，启用 TLS 时在 nginx 中追加。
-- 动作方案的版本化修订（每次编辑生成新版本行）暂以"仅草稿可编辑 + 审计留痕"实现；规格的完整版本表在下一迭代补充。
-- 概率校准（Brier/ECE）按规格 3.6 的门槛继续禁用，直至正例样本扩充并完成时间外验证。
+- **保留期定时器** ✅：`citypulse.system.retention` Celery 任务（beat 每日调度）清理超过 365 天的审计行与超过 90 天的已提交原始上传文件，清理量记录在任务结果中；数据集元数据与观测数据保留。
+- **动作方案版本表** ✅：`action_plan_versions` 在生成、编辑、提交、审批各事件写入版本快照（`GET /api/v1/action-plans/{id}/versions` 可查），历史版本不可覆盖。
+- **概率校准工具** ✅：`calibration` 模块从回测快照计算 Brier / ECE / 可靠性分箱（`POST /api/v1/calibration-reports`），样本 <100 判定 `insufficient_samples`；概率展示门禁按规格 3.6 继续关闭，所有响应附带 gate_note。
+- **HSTS**：反向代理配置中已留注释位，TLS 终止后在对应 server 块启用（本地 HTTP 部署不启用，避免破坏访问）。

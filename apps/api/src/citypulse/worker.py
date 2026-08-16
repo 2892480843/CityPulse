@@ -20,6 +20,12 @@ celery_app.conf.update(
     task_serializer="json",
     timezone="Asia/Shanghai",
     worker_prefetch_multiplier=1,
+    beat_schedule={
+        "daily-retention": {
+            "task": "citypulse.system.retention",
+            "schedule": 86400.0,
+        }
+    },
 )
 celery_app.autodiscover_tasks(["citypulse.system"], force=True)
 

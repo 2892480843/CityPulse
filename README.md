@@ -75,7 +75,7 @@ python src/scoring.py data/city_score_snapshot.csv --output ranked_output.csv
 - **备份与恢复**：`scripts/backup.sh` 导出数据库（pg_dump）与上传卷并生成 SHA-256 清单；`scripts/restore-drill.sh` 在隔离容器中恢复并断言 alembic head、城市目录、用户与审计行数，结果记录于 `backups/restore-drill.log`。`docker compose --profile backup up -d` 启用每日定时备份（`CITYPULSE_BACKUP_INTERVAL_SECONDS` 可调）。
 - **端到端部署测试**：`scripts/smoke-compose.sh` 在全新 Linux 容器栈中执行完整用户旅程——迁移 → bootstrap 三角色 → 登录 → 上传面板 → 校验 → 提交 → 预测运行 → 时间截断回测 → 动作草案 → 运营审批 → 任务中心 → 审计断言 → worker 探活，CI 中随每次推送执行。
 - **安全基线**：登录限流、CSRF、Argon2id、服务端会话、上传隔离校验、追加式审计（阶段 2 已交付）；CSP / X-Content-Type-Options / Referrer-Policy 已在反向代理配置，HSTS 待 TLS 终止后启用。
-- **验收对照**：`docs/stage5_acceptance.md` 逐项映射设计规格 5.6 的最终验收清单，并记录有意裁剪的边界（审计保留期定时器、动作版本表、概率校准门槛）。
+- **验收对照**：`docs/stage5_acceptance.md` 逐项映射设计规格 5.6 的最终验收清单；后续迭代（迁移 0004）补齐了保留期定时器、动作方案版本表与概率校准实验工具（Brier/ECE，概率展示门禁按规格保持关闭）。
 
 ### 阶段 3-4：预测闭环 · 动作与回测
 
