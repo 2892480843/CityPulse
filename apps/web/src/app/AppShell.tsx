@@ -9,17 +9,23 @@ type NavItem = {
   label: string
   hint?: string
   roles?: RoleName[]
+  group: 'biz' | 'sys'
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/overview', label: '总览' },
-  { path: '/data', label: '数据中心', roles: ['admin', 'analyst'] },
-  { path: '/predictions', label: '预测' },
-  { path: '/actions', label: '经营动作' },
-  { path: '/backtests', label: '历史回测', roles: ['admin', 'analyst'] },
-  { path: '/system', label: '系统状态' },
-  { path: '/admin', label: '系统管理', roles: ['admin'] },
+  { path: '/overview', label: '总览', group: 'biz' },
+  { path: '/data', label: '数据中心', roles: ['admin', 'analyst'], group: 'biz' },
+  { path: '/predictions', label: '预测', group: 'biz' },
+  { path: '/actions', label: '经营动作', group: 'biz' },
+  { path: '/backtests', label: '历史回测', roles: ['admin', 'analyst'], group: 'biz' },
+  { path: '/system', label: '系统状态', group: 'sys' },
+  { path: '/admin', label: '系统管理', roles: ['admin'], group: 'sys' },
 ]
+
+const GROUPS = [
+  { key: 'biz', label: '业务' },
+  { key: 'sys', label: '系统' },
+] as const
 
 const ROLE_LABELS: Record<RoleName, string> = {
   admin: '管理员',
@@ -40,21 +46,33 @@ export function AppShell({ children }: { children: ReactNode }) {
       <aside className="shell-side">
         <div className="brand">
           City<span>Pulse</span>
+          <i className="brand-dot" aria-hidden="true" />
         </div>
         <p className="brand-sub">热城先知 · 生产平台</p>
         <nav aria-label="主导航" className="shell-nav">
-          {items.map((item) => (
-            <button
-              key={item.path}
-              type="button"
-              className={path === item.path ? 'nav-link on' : 'nav-link'}
-              aria-current={path === item.path ? 'page' : undefined}
-              onClick={() => navigate(item.path)}
-            >
-              <span>{item.label}</span>
-              {item.hint ? <small>{item.hint}</small> : null}
-            </button>
-          ))}
+          {GROUPS.map((group) => {
+            const groupItems = items.filter(
+              (item) => item.group === group.key,
+            )
+            if (groupItems.length === 0) return null
+            return (
+              <fieldset key={group.key} className="nav-group">
+                <legend>{group.label}</legend>
+                {groupItems.map((item) => (
+                  <button
+                    key={item.path}
+                    type="button"
+                    className={path === item.path ? 'nav-link on' : 'nav-link'}
+                    aria-current={path === item.path ? 'page' : undefined}
+                    onClick={() => navigate(item.path)}
+                  >
+                    <span>{item.label}</span>
+                    {item.hint ? <small>{item.hint}</small> : null}
+                  </button>
+                ))}
+              </fieldset>
+            )
+          })}
         </nav>
         <div className="shell-user">
           <p className="shell-user-name">{user?.display_name}</p>

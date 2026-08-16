@@ -146,7 +146,15 @@ export function DemoPage() {
             <tbody>
               {data.leaderboard.map((item) => (
                 <tr key={item.rank}>
-                  <td>{item.rank}</td>
+                  <td className="rank-cell">
+                    <span
+                      className={
+                        item.rank <= 3 ? `rank-no top-${item.rank}` : 'rank-no'
+                      }
+                    >
+                      {item.rank}
+                    </span>
+                  </td>
                   <td>
                     <strong>{item.city_name}</strong>
                     <div className="muted">{item.province}</div>

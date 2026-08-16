@@ -317,7 +317,17 @@ export function PredictionsPage() {
                     key={item.id}
                     className={item.city_code === selectedCity ? 'row-on' : undefined}
                   >
-                    <td>{item.trend_rank}</td>
+                    <td className="rank-cell">
+                      <span
+                        className={
+                          item.trend_rank <= 3
+                            ? `rank-no top-${item.trend_rank}`
+                            : 'rank-no'
+                        }
+                      >
+                        {item.trend_rank}
+                      </span>
+                    </td>
                     <td>
                       <strong>{item.city_name}</strong>
                       <div className="muted">{item.province}</div>
