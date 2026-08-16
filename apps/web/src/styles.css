@@ -916,3 +916,53 @@ td {
   color: #8a5a1d;
   margin-left: 6px;
 }
+
+/* ---------- Public demo page ---------- */
+
+.demo-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+  display: grid;
+  gap: 26px;
+}
+
+.demo-header .brand-light {
+  color: #17212b;
+}
+
+.demo-header .brand-light small {
+  font-size: 15px;
+  font-weight: 600;
+  color: #687078;
+  margin-left: 8px;
+}
+
+.demo-header h1 {
+  margin: 10px 0 6px;
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem);
+}
+
+.demo-disclaimer {
+  background: #fbeae4;
+  border-left: 4px solid #b54b2a;
+  color: #7c2410;
+  border-radius: 0 10px 10px 0;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+.demo-section h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+.demo-footer {
+  border-top: 1px dashed #d0c8b8;
+  padding-top: 14px;
+  font-size: 12.5px;
+}
+
+.btn-demo-peek {
+  width: 100%;
+}

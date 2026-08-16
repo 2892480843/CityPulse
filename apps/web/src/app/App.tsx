@@ -4,6 +4,7 @@ import { AppShell } from './AppShell'
 import { AuthProvider, useAuth } from './AuthContext'
 import { RouterProvider, useRouter } from './RouteContext'
 import { LoginPage } from '../features/auth/LoginPage'
+import { DemoPage } from '../features/demo/DemoPage'
 import { OverviewPage } from '../features/overview/OverviewPage'
 import { DataCenterPage } from '../features/data/DataCenterPage'
 import { AdminUsersPage } from '../features/admin/AdminUsersPage'
@@ -46,7 +47,7 @@ function Routes() {
   const { status, user, hasRole } = useAuth()
 
   useEffect(() => {
-    if (status === 'anonymous' && path !== '/login') {
+    if (status === 'anonymous' && path !== '/login' && path !== '/demo') {
       navigate('/login')
     }
     if (status === 'authenticated' && (path === '/login' || path === '/' || path === '')) {
@@ -63,7 +64,7 @@ function Routes() {
   }
 
   if (status === 'anonymous') {
-    return <LoginPage />
+    return path === '/demo' ? <DemoPage /> : <LoginPage />
   }
 
   const route = ROUTES.find((candidate) => candidate.path === path)

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 
 import { useAuth } from '../../app/AuthContext'
+import { useRouter } from '../../app/RouteContext'
 import { ApiError } from '../../shared/api/client'
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -23,6 +24,7 @@ const BRAND_POINTS = [
 
 export function LoginPage() {
   const { login } = useAuth()
+  const { navigate } = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -109,6 +111,10 @@ export function LoginPage() {
 
           <button type="submit" className="btn primary btn-login" disabled={submitting}>
             {submitting ? '正在登录…' : '登录'}
+          </button>
+
+          <button type="button" className="btn btn-demo-peek" onClick={() => navigate('/demo')}>
+            先看演示结果 →
           </button>
 
           <div className="demo-accounts" aria-label="演示账号">
