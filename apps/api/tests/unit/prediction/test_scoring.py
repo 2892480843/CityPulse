@@ -1,5 +1,7 @@
 from datetime import date, datetime, timedelta
 
+import pytest
+
 from citypulse.prediction.scoring import CityObservations, score_city
 
 FULL_HIGH = {
@@ -15,10 +17,18 @@ FULL_HIGH = {
 LOW = {name: 25 for name in FULL_HIGH}
 
 
-def observations(values: dict[str, float], *, days_ago: int = 1) -> CityObservations:
+def observations(
+    values: dict[str, float],
+    *,
+    days_ago: int = 1,
+    recent: dict[str, float] | None = None,
+    baseline: dict[str, float] | None = None,
+) -> CityObservations:
     return CityObservations(
         city_code="222401",
         values=values,
+        recent_values=recent or values,
+        baseline_values=baseline or values,
         last_available_at=datetime.combine(
             date.today() - timedelta(days=days_ago), datetime.min.time()
         ),
@@ -76,3 +86,33 @@ def test_missing_metrics_are_renormalized_not_zero_filled() -> None:
 
     assert scored.trend_score == 100.0
     assert scored.evidence_coverage == 0.25
+
+
+def test_momentum_flags_accelerating_cities() -> None:
+    baseline = {name: 40.0 for name in FULL_HIGH}
+    recent = {name: 70.0 for name in FULL_HIGH}
+    scored = score_city(
+        observations({**FULL_HIGH, "risk_pressure": 28}, recent=recent, baseline=baseline),
+        as_of=date.today(),
+    )
+
+    assert scored.momentum == pytest.approx(1.75)
+    assert scored.accelerating is True
+
+
+def test_momentum_none_without_baseline_history() -> None:
+    scored = score_city(observations({**FULL_HIGH, "risk_pressure": 28}), as_of=date.today())
+
+    assert scored.momentum == pytest.approx(1.0)
+    assert scored.accelerating is False
+
+
+def test_flat_cities_are_not_flagged() -> None:
+    flat = {name: 60.0 for name in FULL_HIGH}
+    scored = score_city(
+        observations({**flat, "risk_pressure": 28}, recent=flat, baseline=flat),
+        as_of=date.today(),
+    )
+
+    assert scored.momentum == pytest.approx(1.0)
+    assert scored.accelerating is False

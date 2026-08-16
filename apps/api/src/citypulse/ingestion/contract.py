@@ -14,6 +14,8 @@ OPTIONAL_COLUMNS: tuple[str, ...] = ("source_url", "published_at", "observed_at"
 ALLOWED_METRICS: frozenset[str] = frozenset(
     {
         "content_growth",
+        "content_interaction_growth",
+        "young_traveler_share",
         "search_growth",
         "event_trigger",
         "accessibility",
@@ -24,6 +26,12 @@ ALLOWED_METRICS: frozenset[str] = frozenset(
         "risk_pressure",
         "composite_score",
     }
+)
+
+# Optional metrics accepted for collection now; their weights enter the
+# baseline only with a new scoring version after real-data calibration.
+PENDING_CALIBRATION_METRICS: frozenset[str] = frozenset(
+    {"content_interaction_growth", "young_traveler_share"}
 )
 
 FORMULA_PREFIXES: tuple[str, ...] = ("=", "+", "-", "@")

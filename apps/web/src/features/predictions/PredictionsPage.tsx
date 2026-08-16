@@ -67,6 +67,10 @@ function CityDetail({ result, runId }: { result: PredictionResult; runId: string
           <strong>{PRIORITY_LABELS[result.action_priority]}</strong>
           <small>行动优先级</small>
         </div>
+        <div>
+          <strong>{result.momentum === null ? '—' : `${result.momentum}×`}</strong>
+          <small>窗口动量（近 3 日 / 基线）{result.accelerating ? ' · 异常加速' : ''}</small>
+        </div>
       </div>
       {result.blockers.length > 0 ? (
         <p className="notice">
@@ -250,7 +254,7 @@ export function PredictionsPage() {
                 onClick={() =>
                   downloadCsv(
                     `citypulse-leaderboard-${results.data.run.as_of_date}.csv`,
-                    ['排名', '城市', '省份', '趋势分', '风险压力', '证据完整度', '行动优先级', '数据过期'],
+                    ['排名', '城市', '省份', '趋势分', '风险压力', '证据完整度', '行动优先级', '窗口动量', '异常加速', '数据过期'],
                     results.data.items.map((item) => [
                       item.trend_rank,
                       item.city_name,
@@ -259,6 +263,8 @@ export function PredictionsPage() {
                       item.risk_pressure,
                       item.evidence_coverage,
                       item.action_priority,
+                      item.momentum ?? '',
+                      item.accelerating ? '是' : '否',
                       item.data_stale ? '是' : '否',
                     ]),
                     {
@@ -326,6 +332,9 @@ export function PredictionsPage() {
                       <span className={`badge priority-${item.action_priority}`}>
                         {PRIORITY_LABELS[item.action_priority]}
                       </span>
+                      {item.accelerating ? (
+                        <span className="badge accel">异常加速</span>
+                      ) : null}
                       {item.data_stale ? <small className="muted"> 数据过期</small> : null}
                     </td>
                     <td>

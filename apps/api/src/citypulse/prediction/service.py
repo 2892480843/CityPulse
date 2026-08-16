@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from citypulse.city_catalog.models import City
-from citypulse.ingestion.models import SignalObservation
+from citypulse.ingestion.models import Dataset, DatasetVersion, SignalObservation
 from citypulse.prediction.models import PredictionResult, PredictionRun, ScoringVersion
 from citypulse.prediction.scoring import CityObservations, score_city
 from citypulse.shared.errors import AppError
@@ -54,7 +54,12 @@ def _observations_query(
     window_start: date | None = None,
     available_at_cutoff: datetime | None = None,
 ) -> sa.Select:
-    statement = select(SignalObservation)
+    statement = (
+        select(SignalObservation)
+        .join(DatasetVersion, SignalObservation.dataset_version_id == DatasetVersion.id)
+        .join(Dataset, DatasetVersion.dataset_id == Dataset.id)
+        .order_by(Dataset.committed_at, SignalObservation.available_at)
+    )
     if window_start is not None:
         statement = statement.where(SignalObservation.metric_date >= window_start)
     if available_at_cutoff is not None:
@@ -76,12 +81,20 @@ async def collect_city_observations(
         )
     ).scalars().all()
 
+    # (city, metric, date) -> the newest observation across dataset versions
+    deduped: dict[tuple[str, str, object], SignalObservation] = {}
+    for row in rows:
+        key = (row.city_code, row.metric_name, row.metric_date)
+        current = deduped.get(key)
+        if current is None or as_utc(row.available_at) >= as_utc(current.available_at):
+            deduped[key] = row
+
     grouped: dict[str, dict[str, list[tuple[date, float]]]] = {}
     latest_available: dict[str, datetime] = {}
     sourced: dict[str, int] = {}
     totals: dict[str, int] = {}
 
-    for row in rows:
+    for row in deduped.values():
         grouped.setdefault(row.city_code, {}).setdefault(row.metric_name, []).append(
             (row.metric_date, row.value)
         )
@@ -96,14 +109,23 @@ async def collect_city_observations(
     observations: dict[str, CityObservations] = {}
     for city_code, metrics in grouped.items():
         values: dict[str, float] = {}
+        recent_values: dict[str, float] = {}
+        baseline_values: dict[str, float] = {}
         for metric, history in metrics.items():
             history.sort(key=lambda item: item[0], reverse=True)
             recent = history[:MAX_METRIC_HISTORY]
-            values[metric] = sum(value for _date, value in recent) / len(recent)
+            tail = [value for _date, value in recent]
+            values[metric] = sum(tail) / len(tail)
+            recent_values[metric] = values[metric]
+            earlier = [value for _date, value in history[MAX_METRIC_HISTORY:]]
+            if earlier:
+                baseline_values[metric] = sum(earlier) / len(earlier)
         total = totals.get(city_code, 0)
         observations[city_code] = CityObservations(
             city_code=city_code,
             values=values,
+            recent_values=recent_values,
+            baseline_values=baseline_values,
             last_available_at=latest_available.get(city_code),
             source_share=(sourced.get(city_code, 0) / total) if total else 0.0,
         )
@@ -190,6 +212,8 @@ async def execute_run(
             evidence_coverage=city_score.evidence_coverage,
             action_priority=city_score.action_priority,
             data_stale=city_score.data_stale,
+            momentum=city_score.momentum,
+            accelerating=city_score.accelerating,
             factors=city_score.factors,
             blockers=city_score.blockers,
         )

@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from citypulse.prediction.models import PredictionResult
 
 HIGH_TEMPLATES = {
-    "target_segment": "年轻情侣与摄影客群；文化、美食与城市叙事优先",
+    "target_segment": "25 岁以下及大学生客群优先（00 后增量最快），兼顾年轻情侣与摄影用户",
     "campaign_theme": "围绕城市独特叙事的抢先体验主题，避免重复通用标题",
     "supply_actions": [
         "核心客源地直达交通方案优先上线",
@@ -21,7 +21,7 @@ HIGH_TEMPLATES = {
 }
 
 MEDIUM_TEMPLATES = {
-    "target_segment": "小范围核心客群验证（单一客源地 + 单一主题）",
+    "target_segment": "小范围核心客群验证（单一客源地 + 单一主题，优先年轻客群）",
     "campaign_theme": "小流量验证主题，聚焦单一卖点",
     "supply_actions": ["仅锁定少量库存试点", "监测首批转化后再决定放量"],
     "assumptions": ["假设信号持续性需二次确认"],

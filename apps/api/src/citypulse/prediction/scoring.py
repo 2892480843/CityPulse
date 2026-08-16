@@ -25,6 +25,7 @@ WATCH_THRESHOLD = 58.0
 BLOCKED_RISK_THRESHOLD = 80.0
 EVIDENCE_PUBLISH_THRESHOLD = 0.5
 DATA_FRESHNESS_DAYS = 14
+ACCELERATION_RATIO = 1.15
 
 ActionPriority = str  # "high" | "medium" | "watch" | "blocked"
 
@@ -33,6 +34,8 @@ ActionPriority = str  # "high" | "medium" | "watch" | "blocked"
 class CityObservations:
     city_code: str
     values: dict[str, float]
+    recent_values: dict[str, float]
+    baseline_values: dict[str, float]
     last_available_at: datetime | None
     source_share: float
 
@@ -45,6 +48,8 @@ class CityScore:
     evidence_coverage: float
     action_priority: ActionPriority
     data_stale: bool
+    momentum: float | None
+    accelerating: bool
     factors: dict[str, float]
     blockers: list[str]
 
@@ -60,6 +65,26 @@ def data_is_stale(last_available_at: datetime | None, as_of: date) -> bool:
 
     moment = as_utc(last_available_at).date()
     return (as_of - moment).days > DATA_FRESHNESS_DAYS
+
+
+def momentum_ratio(observations: CityObservations) -> float | None:
+    """Lightweight acceleration screen: weighted recent mean over window baseline.
+
+    Only trend metrics present in both the recent tail and the earlier
+    baseline participate; None means the history is too short to judge.
+    """
+    shared = [
+        name
+        for name in TREND_WEIGHTS
+        if name in observations.recent_values and name in observations.baseline_values
+    ]
+    if not shared:
+        return None
+    baseline = sum(TREND_WEIGHTS[name] * observations.baseline_values[name] for name in shared)
+    recent = sum(TREND_WEIGHTS[name] * observations.recent_values[name] for name in shared)
+    if baseline <= 0:
+        return None
+    return round(recent / baseline, 3)
 
 
 def score_city(observations: CityObservations, *, as_of: date) -> CityScore:
@@ -94,6 +119,9 @@ def score_city(observations: CityObservations, *, as_of: date) -> CityScore:
     else:
         priority = "watch"
 
+    momentum = momentum_ratio(observations)
+    accelerating = momentum is not None and momentum >= ACCELERATION_RATIO
+
     return CityScore(
         city_code=observations.city_code,
         trend_score=round(trend, 1),
@@ -101,6 +129,8 @@ def score_city(observations: CityObservations, *, as_of: date) -> CityScore:
         evidence_coverage=round(coverage, 3),
         action_priority=priority,
         data_stale=stale,
+        momentum=momentum,
+        accelerating=accelerating,
         factors={name: round(value, 1) for name, value in sorted(present.items())},
         blockers=blockers,
     )

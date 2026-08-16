@@ -45,6 +45,8 @@ class PredictionResultView(BaseModel):
     evidence_coverage: float
     action_priority: ActionPriorityName
     data_stale: bool
+    momentum: float | None
+    accelerating: bool
     factors: dict[str, float]
     blockers: list[str]
 

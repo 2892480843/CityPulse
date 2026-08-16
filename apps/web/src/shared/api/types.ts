@@ -147,6 +147,8 @@ export type PredictionResult = {
   evidence_coverage: number
   action_priority: ActionPriority
   data_stale: boolean
+  momentum: number | null
+  accelerating: boolean
   factors: Record<string, number>
   blockers: string[]
 }

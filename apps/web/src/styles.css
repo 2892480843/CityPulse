@@ -780,3 +780,9 @@ td {
 .shell {
   padding-top: 26px;
 }
+
+.badge.accel {
+  background: #f2dfc9;
+  color: #8a5a1d;
+  margin-left: 6px;
+}

@@ -58,6 +58,8 @@ class PredictionResult(Base):
     evidence_coverage: Mapped[float] = mapped_column(sa.Float())
     action_priority: Mapped[str] = mapped_column(sa.String(12))
     data_stale: Mapped[bool] = mapped_column(default=False)
+    momentum: Mapped[float | None] = mapped_column(sa.Float())
+    accelerating: Mapped[bool] = mapped_column(default=False)
     factors: Mapped[dict[str, Any]] = mapped_column(sa.JSON)
     blockers: Mapped[list[Any]] = mapped_column(sa.JSON, default=list)
 
