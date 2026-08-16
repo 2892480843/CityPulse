@@ -156,7 +156,7 @@ rm -f /tmp/citypulse-smoke-cookies.txt /tmp/citypulse-smoke-analyst.txt \
 
 "${compose[@]}" exec -T postgres \
   psql -U citypulse -d citypulse -tAc 'SELECT version_num FROM alembic_version' \
-  | grep '0003_prediction'
+  | grep '0004_hardening'
 "${compose[@]}" exec -T postgres \
   psql -U citypulse -d citypulse -tAc "SELECT count(*) FROM audit_logs WHERE action='login_succeeded'" \
   | grep -q '[1-9]'
