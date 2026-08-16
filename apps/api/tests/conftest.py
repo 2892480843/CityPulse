@@ -73,7 +73,14 @@ async def _seed_users(database_url: str) -> None:
 
 
 @pytest.fixture
-def app_client(tmp_path: Path) -> Iterator[TestClient]:
+def app_client(tmp_path: Path, monkeypatch) -> Iterator[TestClient]:
+    from citypulse.shared.config import get_settings
+
+    # keep tests hermetic: never call DeepSeek or Feishu from local env files
+    monkeypatch.setenv("CITYPULSE_DEEPSEEK_API_KEY", "")
+    monkeypatch.setenv("CITYPULSE_FEISHU_WEBHOOK", "")
+    get_settings.cache_clear()
+
     database_url = _build_database(tmp_path)
     _seed_reference_data(database_url)
     asyncio.run(_seed_users(database_url))
