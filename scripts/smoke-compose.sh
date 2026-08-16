@@ -154,9 +154,10 @@ curl --fail --silent -b /tmp/citypulse-smoke-analyst.txt \
 rm -f /tmp/citypulse-smoke-cookies.txt /tmp/citypulse-smoke-analyst.txt \
   /tmp/citypulse-smoke-operator.txt /tmp/citypulse-smoke-panel.csv
 
+expected_head=$(ls apps/api/migrations/versions/*.py | sed -E 's|.*/([0-9a-z_]+)\.py|\1|' | sort | tail -1)
 "${compose[@]}" exec -T postgres \
   psql -U citypulse -d citypulse -tAc 'SELECT version_num FROM alembic_version' \
-  | grep '0004_hardening'
+  | grep -x "$expected_head"
 "${compose[@]}" exec -T postgres \
   psql -U citypulse -d citypulse -tAc "SELECT count(*) FROM audit_logs WHERE action='login_succeeded'" \
   | grep -q '[1-9]'
