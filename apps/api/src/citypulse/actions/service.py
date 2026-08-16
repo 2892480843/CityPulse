@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from citypulse.actions.deepseek import deepseek_draft, merge_generated
+from citypulse.actions.feishu import notify as notify_feishu
 from citypulse.actions.generator import rule_draft
 from citypulse.actions.models import ActionPlan, ActionPlanVersion
 from citypulse.identity.rbac import Identity
@@ -226,6 +227,10 @@ async def review_plan(
     await record_plan_version(
         db, plan, event=decision, actor_id=identity.user_id, note=comment
     )
+    if decision == "approved":
+        from citypulse.shared.config import get_settings
+
+        notify_feishu(get_settings().feishu_webhook, plan)
     return plan
 
 

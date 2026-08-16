@@ -77,6 +77,18 @@ python src/scoring.py data/city_score_snapshot.csv --output ranked_output.csv
 - **安全基线**：登录限流、CSRF、Argon2id、服务端会话、上传隔离校验、追加式审计（阶段 2 已交付）；CSP / X-Content-Type-Options / Referrer-Policy 已在反向代理配置，HSTS 待 TLS 终止后启用。
 - **验收对照**：`docs/stage5_acceptance.md` 逐项映射设计规格 5.6 的最终验收清单；后续迭代（迁移 0004）补齐了保留期定时器、动作方案版本表与概率校准实验工具（Brier/ECE，概率展示门禁按规格保持关闭）。
 
+### 评审材料索引
+
+- `docs/ai_design.md` — AI 架构原创性（预测/生成分工、三分离输出、概率门禁、降级链与 Prompt 原文）
+- `docs/business_value.md` — 业务价值（痛点对照、量化收益估算口径、A/B 验证路径、跨行业推广矩阵）
+- `docs/insight_alignment.md` — 命题洞察对照（社交信号/年轻客群/预测窗口）
+- `docs/stage5_acceptance.md` — 设计规格 5.6 验收清单逐项证据
+- `docs/backtest_protocol.md` — 时间截断回测协议
+
+### 飞书通知（可选）
+
+配置 `CITYPULSE_FEISHU_WEBHOOK`（飞书群自定义机器人地址）后，动作方案**批准**时自动向群内推送绿色卡片（城市/客群/窗口/主题/供给动作 + 演示声明）。未配置或投递失败时静默跳过，不影响审批流；见 `citypulse/actions/feishu.py`。
+
 ### 官方开放数据源（data_source 模块）
 
 - **行政区划快照**：`data/official/admin_divisions_cn.csv`（338 个地级单位，派生自民政部公开区划代码，来源与快照日期见 `data/official/README.md`），一键幂等导入城市目录（13 → 341 城）。
