@@ -34,6 +34,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
+      <div className="demo-banner" role="note">
+        演示工作区 · 当前数据为方法演示样本，不构成真实预测；导出文件均附带真实性声明。
+      </div>
       <aside className="shell-side">
         <div className="brand">
           City<span>Pulse</span>

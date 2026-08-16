@@ -11,3 +11,14 @@ export const createBacktest = (payload: {
 }) => postJson<BacktestRun>('/api/v1/backtest-runs', payload)
 
 export const listCities = () => getJson<CityListResponse>('/api/v1/cities?limit=100')
+
+export const listCalibrationReports = () =>
+  getJson<import('../../shared/api/types').CalibrationListResponse>(
+    '/api/v1/calibration-reports?limit=10',
+  )
+
+export const createCalibrationReport = (backtestRunId: string) =>
+  postJson<import('../../shared/api/types').CalibrationReport>(
+    '/api/v1/calibration-reports',
+    { backtest_run_id: backtestRunId },
+  )

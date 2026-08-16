@@ -22,3 +22,8 @@ export const cityTrend = (cityCode: string, runId: string | null, windowDays = 1
   )
 
 export const listJobs = () => getJson<JobList>('/api/v1/jobs')
+
+export const cityEvidence = (cityCode: string) =>
+  getJson<import('../../shared/api/types').CityEvidence>(
+    `/api/v1/cities/${cityCode}/evidence`,
+  )

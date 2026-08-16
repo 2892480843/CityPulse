@@ -240,3 +240,39 @@ export type BacktestRun = {
 }
 
 export type BacktestRunList = { items: BacktestRun[]; total: number }
+
+export type CalibrationVerdict =
+  | 'insufficient_samples'
+  | 'eligible_for_validation'
+  | 'not_eligible'
+
+export type CalibrationReport = {
+  id: string
+  backtest_run_id: string
+  sample_size: number
+  brier: number
+  ece: number
+  bins: { bin_low: number; bin_high: number; count: number; mean_score: number; observed_rate: number }[]
+  verdict: CalibrationVerdict
+  created_by: string
+  created_at: string
+}
+
+export type CalibrationListResponse = {
+  items: CalibrationReport[]
+  total: number
+  gate_note: string
+}
+
+export type CityEvidence = {
+  city_code: string
+  total_observations: number
+  sourced_share: number
+  metric_coverage: number
+  covered_metrics: string[]
+  missing_metrics: string[]
+  date_min: string | null
+  date_max: string | null
+  latest_available_at: string | null
+  sources: string[]
+}

@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useAuth } from '../../app/AuthContext'
 import { ApiError } from '../../shared/api/client'
 import type { PredictionResult } from '../../shared/api/types'
-import { cityTrend, createRun, listJobs, listRuns, runResults } from './api'
+import { cityEvidence, cityTrend, createRun, listJobs, listRuns, runResults } from './api'
+import { downloadCsv } from '../../shared/exportCsv'
 
 const PRIORITY_LABELS: Record<string, string> = {
   high: '行动',
@@ -37,6 +38,10 @@ function CityDetail({ result, runId }: { result: PredictionResult; runId: string
   const trend = useQuery({
     queryKey: ['cityTrend', result.city_code, runId],
     queryFn: () => cityTrend(result.city_code, runId),
+  })
+  const evidence = useQuery({
+    queryKey: ['cityEvidence', result.city_code],
+    queryFn: () => cityEvidence(result.city_code),
   })
 
   return (
@@ -79,6 +84,37 @@ function CityDetail({ result, runId }: { result: PredictionResult; runId: string
           </div>
         ))}
       </div>
+      {evidence.data ? (
+        <>
+          <h4>证据链汇总</h4>
+          <div className="metric-row">
+            <div>
+              <strong>{evidence.data.total_observations}</strong>
+              <small>观测行数</small>
+            </div>
+            <div>
+              <strong>{Math.round(evidence.data.sourced_share * 100)}%</strong>
+              <small>带来源占比</small>
+            </div>
+            <div>
+              <strong>{Math.round(evidence.data.metric_coverage * 100)}%</strong>
+              <small>指标覆盖</small>
+            </div>
+            <div>
+              <strong>{evidence.data.sources.length}</strong>
+              <small>来源域名数</small>
+            </div>
+          </div>
+          {evidence.data.missing_metrics.length > 0 ? (
+            <p className="notice">缺失指标：{evidence.data.missing_metrics.join('、')}</p>
+          ) : null}
+          <p className="muted">
+            覆盖 {evidence.data.date_min} ~ {evidence.data.date_max}；最近可用时间{' '}
+            {evidence.data.latest_available_at?.slice(0, 10)}；来源：
+            {evidence.data.sources.join('、') || '无'}
+          </p>
+        </>
+      ) : null}
       {trend.data ? (
         <>
           <h4>信号时间序列（近 {trend.data.series_window_days} 天）</h4>
@@ -121,7 +157,12 @@ export function PredictionsPage() {
     queryFn: () => runResults(activeRun as string),
     enabled: activeRun !== null,
   })
-  const jobs = useQuery({ queryKey: ['jobs'], queryFn: listJobs, enabled: tab === 'jobs' })
+  const jobs = useQuery({
+    queryKey: ['jobs'],
+    queryFn: listJobs,
+    enabled: tab === 'jobs',
+    refetchInterval: 5000,
+  })
 
   const create = useMutation({
     mutationFn: () => createRun(windowDays),
@@ -198,6 +239,38 @@ export function PredictionsPage() {
                   {error}
                 </p>
               ) : null}
+            </div>
+          ) : null}
+
+          {results.data ? (
+            <div className="toolbar">
+              <button
+                type="button"
+                className="btn"
+                onClick={() =>
+                  downloadCsv(
+                    `citypulse-leaderboard-${results.data.run.as_of_date}.csv`,
+                    ['排名', '城市', '省份', '趋势分', '风险压力', '证据完整度', '行动优先级', '数据过期'],
+                    results.data.items.map((item) => [
+                      item.trend_rank,
+                      item.city_name,
+                      item.province,
+                      item.trend_score,
+                      item.risk_pressure,
+                      item.evidence_coverage,
+                      item.action_priority,
+                      item.data_stale ? '是' : '否',
+                    ]),
+                    {
+                      运行窗口: `${results.data.run.window_days} 天`,
+                      数据日期: results.data.run.as_of_date,
+                      生成时间: new Date().toISOString(),
+                    },
+                  )
+                }
+              >
+                导出榜单 CSV
+              </button>
             </div>
           ) : null}
 

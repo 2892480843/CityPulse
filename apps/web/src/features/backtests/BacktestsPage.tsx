@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { useAuth } from '../../app/AuthContext'
 import { ApiError } from '../../shared/api/client'
 import type { BacktestRun } from '../../shared/api/types'
-import { createBacktest, listBacktests, listCities } from './api'
+import {
+  createBacktest,
+  createCalibrationReport,
+  listBacktests,
+  listCities,
+} from './api'
+import { downloadCsv } from '../../shared/exportCsv'
 
 function MetricsCards({ metrics }: { metrics: NonNullable<BacktestRun['metrics']> }) {
   return (
@@ -61,6 +67,13 @@ export function BacktestsPage() {
       setError(null)
     },
     onError: (cause) => setError(cause instanceof ApiError ? cause.message : '创建失败。'),
+  })
+
+  const calibration = useMutation({
+    mutationFn: () => createCalibrationReport(run?.id ?? ''),
+    onSuccess: () => setError(null),
+    onError: (cause) =>
+      setError(cause instanceof ApiError ? cause.message : '生成校准报告失败。'),
   })
 
   const toggle = (
@@ -162,6 +175,58 @@ export function BacktestsPage() {
       {run?.metrics ? (
         <>
           <MetricsCards metrics={run.metrics} />
+          <div className="toolbar">
+            {hasRole('analyst') ? (
+              <button
+                type="button"
+                className="btn"
+                disabled={calibration.isPending}
+                onClick={() => calibration.mutate()}
+              >
+                {calibration.isPending ? '计算中…' : '生成校准实验报告（Brier / ECE）'}
+              </button>
+            ) : null}
+            {calibration.data ? (
+              <span className="muted">
+                样本 {calibration.data.sample_size} · Brier {calibration.data.brier} · ECE{' '}
+                {calibration.data.ece} ·
+                <span className={`badge priority-${calibration.data.verdict === 'eligible_for_validation' ? 'medium' : 'watch'}`}>
+                  {calibration.data.verdict === 'insufficient_samples'
+                    ? '样本不足'
+                    : calibration.data.verdict}
+                </span>
+              </span>
+            ) : null}
+            <button
+              type="button"
+              className="btn"
+              onClick={() =>
+                run.metrics &&
+                downloadCsv(
+                  `citypulse-backtest-${run.t0}.csv`,
+                  ['截点', '城市', '趋势分', '证据覆盖'],
+                  run.metrics.snapshots.flatMap((snapshot) =>
+                    snapshot.ranking.map((entry) => [
+                      `T0-${snapshot.offset_days}`,
+                      entry.city_code,
+                      entry.trend_score,
+                      snapshot.evidence_coverage,
+                    ]),
+                  ),
+                  { T0: run.t0, 生成时间: new Date().toISOString() },
+                )
+              }
+            >
+              导出回测 CSV
+            </button>
+          </div>
+          {calibration.data ? (
+            <p className="notice">
+              校准报告为实验产物：分箱 {calibration.data.bins
+                .map((bin) => `[${bin.bin_low}-${bin.bin_high}] n={bin.count} 期望={bin.mean_score} 实测=${bin.observed_rate}`)
+                .join('；')}。概率展示门禁保持关闭，直至管理员发布通过时间外验证的校准版本。
+            </p>
+          ) : null}
           <h3>各截点排名快照</h3>
           <table>
             <thead>

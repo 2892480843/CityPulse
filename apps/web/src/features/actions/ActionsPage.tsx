@@ -5,6 +5,7 @@ import { useAuth } from '../../app/AuthContext'
 import { ApiError } from '../../shared/api/client'
 import type { ActionPlan } from '../../shared/api/types'
 import { generatePlan, listPlans, reviewPlan, submitPlan, updatePlan } from './api'
+import { downloadCsv } from '../../shared/exportCsv'
 import { listRuns, runResults } from '../predictions/api'
 
 const STATUS_LABELS: Record<string, string> = {
@@ -220,6 +221,33 @@ export function ActionsPage() {
               {error}
             </p>
           ) : null}
+        </div>
+      ) : null}
+
+      {plans.data && plans.data.items.length > 0 ? (
+        <div className="toolbar">
+          <button
+            type="button"
+            className="btn"
+            onClick={() =>
+              downloadCsv(
+                'citypulse-action-plans.csv',
+                ['城市', '状态', '生成方式', '目标客群', '行动窗口', '投放主题', '创建时间'],
+                plans.data.items.map((item) => [
+                  item.city_name,
+                  item.status,
+                  item.generator_type,
+                  item.target_segment,
+                  `${item.action_window_start ?? '—'} ~ ${item.action_window_end ?? '—'}`,
+                  item.campaign_theme,
+                  item.created_at,
+                ]),
+                { 状态筛选: statusFilter || '全部', 生成时间: new Date().toISOString() },
+              )
+            }
+          >
+            导出动作清单 CSV
+          </button>
         </div>
       ) : null}
 

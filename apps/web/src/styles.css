@@ -760,3 +760,23 @@ td {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+/* ---------- Demo banner & hardening additions ---------- */
+
+.demo-banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: #b54b2a;
+  color: #fff;
+  font-size: 12px;
+  text-align: center;
+  padding: 5px 12px;
+  letter-spacing: 0.03em;
+}
+
+.shell {
+  padding-top: 26px;
+}
