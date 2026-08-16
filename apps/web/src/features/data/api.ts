@@ -20,3 +20,12 @@ export const commitDataset = (id: string) =>
 
 export const searchCities = (query: string) =>
   getJson<CityListResponse>(`/api/v1/cities?q=${encodeURIComponent(query)}&limit=20`)
+
+export const listDataSources = () =>
+  getJson<import('../../shared/api/types').DataSourceList>('/api/v1/data-sources')
+
+export const syncDataSource = (id: string) =>
+  postJson<{
+    source: import('../../shared/api/types').DataSourceView
+    result: Record<string, unknown>
+  }>(`/api/v1/data-sources/${id}/sync`)

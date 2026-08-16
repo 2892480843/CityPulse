@@ -77,6 +77,12 @@ python src/scoring.py data/city_score_snapshot.csv --output ranked_output.csv
 - **安全基线**：登录限流、CSRF、Argon2id、服务端会话、上传隔离校验、追加式审计（阶段 2 已交付）；CSP / X-Content-Type-Options / Referrer-Policy 已在反向代理配置，HSTS 待 TLS 终止后启用。
 - **验收对照**：`docs/stage5_acceptance.md` 逐项映射设计规格 5.6 的最终验收清单；后续迭代（迁移 0004）补齐了保留期定时器、动作方案版本表与概率校准实验工具（Brier/ECE，概率展示门禁按规格保持关闭）。
 
+### 官方开放数据源（data_source 模块）
+
+- **行政区划快照**：`data/official/admin_divisions_cn.csv`（338 个地级单位，派生自民政部公开区划代码，来源与快照日期见 `data/official/README.md`），一键幂等导入城市目录（13 → 341 城）。
+- **Open-Meteo 气象**：免密开放接口拉取历史天气 → 温度/降水映射为合同的 `weather_fit` 指标 → **走完整数据合同校验**后提交为不可变 `official_sync` 数据集；来源 URL 与 CC-BY 4.0 声明随行。
+- 数据中心"数据源"页可查看两个源的最近同步状态/摘要，分析师一键触发同步；同步任务入任务中心并写审计。
+
 ### 阶段 3-4：预测闭环 · 动作与回测
 
 - **评分分层**：趋势分（版本化权重的透明基线，排序分而非概率）、风险压力、证据完整度、行动优先级四项独立存储与展示；硬约束包括"风险 ≥80 直接 blocked"、"证据 <50% 最高 watch"、"数据超过 14 天不得 high"。

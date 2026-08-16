@@ -7,6 +7,7 @@ from citypulse.actions.router import router as actions_router
 from citypulse.backtest.router import router as backtest_router
 from citypulse.calibration.router import router as calibration_router
 from citypulse.city_catalog.router import router as city_catalog_router
+from citypulse.data_source.router import router as data_source_router
 from citypulse.evidence.router import router as evidence_router
 from citypulse.identity.ratelimit import LoginRateLimiter
 from citypulse.identity.router import admin_router as identity_admin_router
@@ -65,6 +66,7 @@ def create_app() -> FastAPI:
     app.include_router(jobs_router)
     app.include_router(calibration_router)
     app.include_router(evidence_router)
+    app.include_router(data_source_router)
     return app
 
 

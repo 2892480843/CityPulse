@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from citypulse.shared.orm import Base
 
 JobStatus = Literal["queued", "running", "succeeded", "failed"]
-JobType = Literal["prediction_run", "backtest_run", "action_generation"]
+JobType = Literal["prediction_run", "backtest_run", "action_generation", "source_sync"]
 
 
 class Job(Base):

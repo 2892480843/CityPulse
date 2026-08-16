@@ -278,3 +278,17 @@ export type CityEvidence = {
   latest_available_at: string | null
   sources: string[]
 }
+
+export type DataSourceView = {
+  id: string
+  kind: 'admin_divisions' | 'open_meteo_weather'
+  label: string
+  source_url: string
+  is_enabled: boolean
+  last_synced_at: string | null
+  last_status: string | null
+  last_summary: string | null
+  created_at: string
+}
+
+export type DataSourceList = { items: DataSourceView[]; total: number }

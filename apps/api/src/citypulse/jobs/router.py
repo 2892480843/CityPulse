@@ -17,7 +17,7 @@ class JobView(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: uuid.UUID
-    job_type: Literal["prediction_run", "backtest_run", "action_generation"]
+    job_type: Literal["prediction_run", "backtest_run", "action_generation", "source_sync"]
     status: Literal["queued", "running", "succeeded", "failed"]
     ref_type: str | None
     ref_id: uuid.UUID | None

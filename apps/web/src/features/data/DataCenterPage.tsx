@@ -6,8 +6,10 @@ import { ApiError } from '../../shared/api/client'
 import type { Dataset, ValidationIssue } from '../../shared/api/types'
 import {
   commitDataset,
+  listDataSources,
   listDatasets,
   searchCities,
+  syncDataSource,
   uploadDataset,
   validateDataset,
 } from './api'
@@ -188,6 +190,89 @@ function CityCatalogPanel() {
   )
 }
 
+function SourcesPanel({ canSync }: { canSync: boolean }) {
+  const queryClient = useQueryClient()
+  const sources = useQuery({ queryKey: ['dataSources'], queryFn: listDataSources })
+  const [error, setError] = useState<string | null>(null)
+  const sync = useMutation({
+    mutationFn: (id: string) => syncDataSource(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dataSources'] })
+      queryClient.invalidateQueries({ queryKey: ['datasets'] })
+      setError(null)
+    },
+    onError: (cause) =>
+      setError(cause instanceof ApiError ? cause.message : '同步失败，请稍后重试。'),
+  })
+
+  if (sources.isPending) return <p className="muted">正在加载数据源…</p>
+  if (sources.isError) return <p role="alert">数据源加载失败。</p>
+
+  return (
+    <section aria-label="官方开放数据源">
+      <p className="muted">
+        仅接入官方或免密开放接口；同步结果走完整数据合同校验后提交为不可变版本。
+      </p>
+      {error ? (
+        <p role="alert" className="form-error">
+          {error}
+        </p>
+      ) : null}
+      <table>
+        <thead>
+          <tr>
+            <th>数据源</th>
+            <th>类型</th>
+            <th>最近同步</th>
+            <th>结果摘要</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          {sources.data.items.map((item) => (
+            <tr key={item.id}>
+              <td>
+                <strong>{item.label}</strong>
+                <div className="muted mono">{item.source_url}</div>
+              </td>
+              <td className="mono">{item.kind}</td>
+              <td>
+                {item.last_synced_at
+                  ? new Date(item.last_synced_at).toLocaleString('zh-CN')
+                  : '从未同步'}
+                {item.last_status ? (
+                  <div>
+                    <span className={`badge job-${item.last_status === 'succeeded' ? 'succeeded' : 'failed'}`}>
+                      {item.last_status}
+                    </span>
+                  </div>
+                ) : null}
+              </td>
+              <td className="mono" style={{ maxWidth: 320, wordBreak: 'break-all' }}>
+                {item.last_summary ?? '—'}
+              </td>
+              <td>
+                {canSync ? (
+                  <button
+                    type="button"
+                    className="btn small"
+                    disabled={sync.isPending}
+                    onClick={() => sync.mutate(item.id)}
+                  >
+                    {sync.isPending ? '同步中…' : '立即同步'}
+                  </button>
+                ) : (
+                  <span className="muted">需要分析师</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  )
+}
+
 function UploadPanel({ onNotice }: { onNotice: (message: string) => void }) {
   const queryClient = useQueryClient()
   const [file, setFile] = useState<File | null>(null)
@@ -278,7 +363,7 @@ function UploadPanel({ onNotice }: { onNotice: (message: string) => void }) {
 
 export function DataCenterPage() {
   const { hasRole } = useAuth()
-  const [tab, setTab] = useState<'datasets' | 'cities'>('datasets')
+  const [tab, setTab] = useState<'datasets' | 'cities' | 'sources'>('datasets')
   const [notice, setNotice] = useState<string | null>(null)
   const datasets = useQuery({ queryKey: ['datasets'], queryFn: listDatasets })
   const canAct = hasRole('analyst')
@@ -311,6 +396,15 @@ export function DataCenterPage() {
           onClick={() => setTab('cities')}
         >
           城市目录
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === 'sources'}
+          className={tab === 'sources' ? 'tab on' : 'tab'}
+          onClick={() => setTab('sources')}
+        >
+          数据源
         </button>
       </div>
 
@@ -351,8 +445,10 @@ export function DataCenterPage() {
             </table>
           ) : null}
         </>
-      ) : (
+      ) : tab === 'cities' ? (
         <CityCatalogPanel />
+      ) : (
+        <SourcesPanel canSync={hasRole('analyst')} />
       )}
     </section>
   )

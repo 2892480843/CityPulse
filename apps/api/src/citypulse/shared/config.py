@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     session_secret: SecretStr = SecretStr("local-development-only-change-me")
     cookie_secure: bool = False
     upload_dir: Path = Path("var/uploads")
+    official_data_dir: Path = Path("data/official")
     max_upload_bytes: int = MAX_UPLOAD_BYTES
     max_csv_rows: int = MAX_CSV_ROWS
     deepseek_api_key: SecretStr = SecretStr("")
